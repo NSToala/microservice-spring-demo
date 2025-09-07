@@ -17,5 +17,4 @@ public class SaludoController {
     public String saludar(@PathVariable String nombre) {
         return saludoServices.obtenerSaludo(nombre);
     }
-
 }
