@@ -4,10 +4,8 @@ import com.nstoala.demo.model.Users;
 import com.nstoala.demo.services.SaludoServices;
 import com.nstoala.demo.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,6 +18,9 @@ public class SaludoController {
     @Autowired
     private UsersService usersService;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     @GetMapping("/saludo/{nombre}")
     public String saludar(@PathVariable String nombre) {
         return saludoServices.obtenerSaludo(nombre);
@@ -29,5 +30,17 @@ public class SaludoController {
     @GetMapping("/usuarios")
     public List<Users> obtenerUsuarios() {
         return usersService.obtenerTodos();
+    }
+
+        @PostMapping("/guardar/{clave}")
+    public String guardarEnCache(@PathVariable String clave, @RequestBody String valor) {
+        redisTemplate.opsForValue().set(clave, valor);
+        return "Valor guardado en Redis con clave: " + clave;
+    }
+
+    @GetMapping("/obtener/{clave}")
+    public String obtenerDeCache(@PathVariable String clave) {
+        Object valor = redisTemplate.opsForValue().get(clave);
+        return valor != null ? valor.toString() : "No se encontró valor para la clave: " + clave;
     }
 }
